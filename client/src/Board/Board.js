@@ -10,13 +10,24 @@ const Board = () => {
     ranged: [],
     ballista: [],
   });
+  const [opponentCards, setOpponentCards] = useState([]);
+  const [opponentCardsOnBoard, setOpponentCardsOnBoard] = useState({
+    melee: [],
+    ranged: [],
+    ballista: [],
+  });
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    let cards = [...allCards];
-    cards.sort(() => Math.random() - 0.5);
-    setPlayerCards(cards.slice(0, 10));
+    let playerDeck = [...allCards];
+    playerDeck.sort(() => Math.random() - 0.5);
+    setPlayerCards(playerDeck.slice(0, 10));
+
+    let opponentDeck = [...allCards];
+    opponentDeck.sort(() => Math.random() - 0.5);
+    setOpponentCards(opponentDeck.slice(0, 10));
   }, []);
+
 
   const handleCardClick = (card) => {
     setPlayerCards(playerCards.filter(c => c !== card));
@@ -30,14 +41,30 @@ const Board = () => {
     setScore(prevScore => prevScore + card.power);
   };
 
-
   return (
     <div className="game">
       <div className="score">Score: {score}</div>
+      <div className="opponent-cards">
+        {opponentCards.map((card, index) => (
+          <CardDisplay key={index} {...card} />
+        ))}
+      </div>
       <div className="board">
-        <div className="row opponent-row ballista"></div>
-        <div className="row opponent-row ranged"></div>
-        <div className="row opponent-row melee"></div>
+        <div className="row opponent-row ballista">
+          {opponentCardsOnBoard.ballista.map((card, index) => (
+            <CardDisplay key={index} {...card} />
+          ))}
+        </div>
+        <div className="row opponent-row ranged">
+          {opponentCardsOnBoard.ranged.map((card, index) => (
+            <CardDisplay key={index} {...card} />
+          ))}
+        </div>
+        <div className="row opponent-row melee">
+          {opponentCardsOnBoard.melee.map((card, index) => (
+            <CardDisplay key={index} {...card} />
+          ))}
+        </div>
         <div className="row player-row melee">
           {playerCardsOnBoard.melee.map((card, index) => (
             <CardDisplay key={index} {...card} />
