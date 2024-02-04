@@ -1,13 +1,17 @@
 const { MongoClient, ObjectId } = require("mongodb");
 const passwords = require("../passwords.json");
 const bcrypt = require("bcrypt");
-const { query } = require("express");
+const Yup = require("yup");
 
 const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
 
-// TODO validacja
 async function register(registerData) {
-  if ( await isEmaiInDb(registerData.email)) {
+  const validationRes = await validateRegister(registerData);
+  if (!validationRes.status) {
+    throw new Error(validateRegister.err);
+  }
+
+  if (await isEmaiInDb(registerData.email)) {
     throw new Error("Email exists.");
   } else {
     const client = new MongoClient(connectionString);
@@ -47,6 +51,45 @@ async function isEmaiInDb(email) {
   await client.close();
   if (queryRes === null) return false;
   else return true;
+}
+
+function validateRegister(registerData) {
+  return new Promise((resolve, reject) => {
+    Yup.object({
+      name: Yup.string()
+        .min(1, "Must be at least 1 character")
+        .max(60, "Must be max 60 characters")
+        .required("Name is required"),
+      email: Yup.string()
+        .email("Incorrect email")
+        .min(1, "Must be at least 1 character")
+        .max(60, "Must be max 60 characters")
+        .required("Required"),
+      password: Yup.string()
+        .min(5, "Must be at least 5 characters")
+        .max(
+          100,
+          "Seriously, do You want to remember more than 100 characters?"
+        )
+        .matches(/[0-9]/, "Password requires a number")
+        .matches(/[a-z]/, "Password requires a lowercase letter")
+        .matches(/[A-Z]/, "Password requires an uppercase letter")
+        .matches(/[^\w]/, "Password requires a symbol")
+        .required("Required"),
+    })
+      .validate(registerData)
+      .then(() => {
+        resolve({
+          status: true,
+        });
+      })
+      .catch((err) =>
+        reject({
+          status: false,
+          error: err.message,
+        })
+      );
+  });
 }
 
 module.exports = { register };

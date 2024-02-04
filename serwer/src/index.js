@@ -23,8 +23,7 @@ app.post("/register", (req, res) => {
           res.status(409).send(err.message);
           break;
         default: {
-          console.error(err);
-          res.status(500).send("Error Occured.");
+          res.status(500).send(err);
           break;
         }
       }
