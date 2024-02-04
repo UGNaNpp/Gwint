@@ -1,4 +1,4 @@
-class Card {
+export default class Card {
     constructor(power, cardClass, name) {
         if (power < 0 || power > 10) {
             throw new Error('Power must be between 0 and 10');
