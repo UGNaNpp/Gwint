@@ -28,6 +28,14 @@ const Board = () => {
   const [score, setScore] = useState(0);
   const [enemyScore, setEnemyScore] = useState(0);
 
+  //logika spasowania oraz kryształy
+  const [playerPassed, setPlayerPassed] = useState(false);
+  const [opponentPassed, setOpponentPassed] = useState(false);
+  const [playerCrystals, setPlayerCrystals] = useState(2);
+  const [opponentCrystals, setOpponentCrystals] = useState(2);
+
+  const [botMoves, setBotMoves] = useState(0);
+
   // tasowanie (losowe sortowanie) talii i danie pierwszych 10 graczowi i potem ponowne losowanie i danie przeciwnikowi
   useEffect(() => {
     let playerDeck = [...allCards];
@@ -44,8 +52,8 @@ const Board = () => {
 
   //  kliknięcie w kartę
   const handleCardClick = (card) => {
-    if (!isPlayerTurn) {
-      return; // jak nie masz ruchu to nie klikniesz
+    if (!isPlayerTurn || playerPassed) {
+      return; // jak nie masz ruchu lub spasowałeś to nie klikniesz
     }
 
     // po kliknieciu
@@ -59,28 +67,66 @@ const Board = () => {
     });
     setScore(prevScore => prevScore + card.power); //dodaje punkty. (później punkty powinny być liczone dla każdego rzędu z osobna)
 
-    setIsPlayerTurn(false); // przeciwnik ma ruch
+    if (!opponentPassed) {
+      setIsPlayerTurn(false);
+    } // przeciwnik ma ruch (o ile nie spasował)
 
     // bot po sekundzie wybiera losową kartę
     setTimeout(() => {
-      if (opponentCards.length > 0) {
-        const randomIndex = Math.floor(Math.random() * opponentCards.length);
-        const botCard = opponentCards[randomIndex];
+      if (opponentCards.length > 0 && !opponentPassed) {
+        const passChance = botMoves * 0.02; // szansa na spasowanie bota rośnie z każdym ruchem
+        const e = Math.random()
+        console.log(e, "musi byc mniejsze od ", passChance)
+        if (e < passChance) {
+          console.log('chlop spasował')
+          setOpponentPassed(true);
+          setIsPlayerTurn(true);
+        } else {
+          const randomIndex = Math.floor(Math.random() * opponentCards.length);
+          const botCard = opponentCards[randomIndex];
+          setBotMoves(prevMoves => prevMoves + 1);
 
-        setOpponentCards(opponentCards.filter(c => c !== botCard));
-        setOpponentCardsOnBoard(prevState => {
-          const updatedState = {
-            ...prevState,
-            [botCard.cardClass]: [...prevState[botCard.cardClass], botCard]
-          };
-          return updatedState;
-        });
+          setOpponentCards(opponentCards.filter(c => c !== botCard));
+          setOpponentCardsOnBoard(prevState => {
+            const updatedState = {
+              ...prevState,
+              [botCard.cardClass]: [...prevState[botCard.cardClass], botCard]
+            };
+            return updatedState;
+          });
 
-        setEnemyScore(prevScore => prevScore + botCard.power);
+          setEnemyScore(prevScore => prevScore + botCard.power);
 
-        setIsPlayerTurn(true); // gracz ma ruch
+          if (!playerPassed) { // gracz ma ruch o ile wczesniej nie spasował
+            setIsPlayerTurn(true);
+          }
+        }
+
+        //jesli obydwoje gracze spasowali, koniec rundy i reset statystyk
+        if (playerPassed && opponentPassed) {
+          if (score > enemyScore) {
+            setOpponentCrystals(prevCrystals => prevCrystals - 1);
+          } else if (score < enemyScore) {
+            setPlayerCrystals(prevCrystals => prevCrystals - 1);
+          }
+
+          setPlayerPassed(false);
+          setOpponentPassed(false);
+          setScore(0);
+          setEnemyScore(0);
+          setBotMoves(0);
+
+        }
       }
     }, 1000);
+  };
+
+
+  const handlePassClick = () => { //pasujemy
+    if (isPlayerTurn && !playerPassed) {
+      setPlayerPassed(true);
+      setIsPlayerTurn(false);
+    }
   };
 
   return (
@@ -90,6 +136,7 @@ const Board = () => {
           Twój wynik: {score}
           <div className="cristal"></div>
           <div className="cristal"></div>
+          <button onClick={handlePassClick}>Spasuj</button>
         </div>
         <div className="score">
           Wynik przeciwnika: {enemyScore}
@@ -97,6 +144,7 @@ const Board = () => {
           <div className="cristal"></div>
         </div>
       </div>
+
       <div className="opponent-cards">
 
         {opponentCards.map((card, index) => (
@@ -136,7 +184,7 @@ const Board = () => {
           ))}
         </div>
       </div>
-      
+
       <div className="cards">
         {playerCards.map((card, index) => (
           <CardDisplay key={index} {...card} onClick={() => handleCardClick(card)} />
