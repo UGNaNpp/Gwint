@@ -2,8 +2,7 @@ const { MongoClient, ObjectId } = require("mongodb");
 const passwords = require("../passwords.json");
 const bcrypt = require("bcrypt");
 const Yup = require("yup");
-const { reject } = require("lodash");
-const { query } = require("express");
+
 
 const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -35,6 +34,7 @@ async function logIn(logInData) {
   const client = new MongoClient(connectionString);
   const collection = client.db("Gwint").collection("Users");
   const queryRes = await collection.findOne({ email: logInData.email });
+  await client.close()
   if (queryRes !== null) {
     const isPasswordCorrect = await comparePasswordWithHash(
       logInData.password,
@@ -75,21 +75,32 @@ function comparePasswordWithHash(password, hashPassword) {
         }
       });
     })
+    
+  }
+  
+  async function isEmaiInDb(email) {
+    const client = new MongoClient(connectionString);
+    const collection = client.db("Gwint").collection("Users");
+    const queryRes = await collection.findOne({
+      email: email,
+    });
+    await client.close();
+    if (queryRes === null) return false;
+    else return true;
+  }
 
-}
 
-// TODO zablokowanie 2 takich samych nazw użytkownika
-async function isEmaiInDb(email) {
-  const client = new MongoClient(connectionString);
-  const collection = client.db("Gwint").collection("Users");
-  const queryRes = await collection.findOne({
-    email: email,
-  });
-  await client.close();
-  if (queryRes === null) return false;
-  else return true;
-}
-
+  async function isUserIdInDb (userId) {
+    const client = new MongoClient(connectionString);
+    const collection = client.db("Gwint").collection("Users");
+    const queryRes = await collection.findOne({_id: new ObjectId(userId)});
+  if (queryRes !== null) {
+    return true;
+  } else {
+    return false;
+  }
+  }
+  
 function validateRegister(registerData) {
   return new Promise((resolve, reject) => {
     Yup.object({
@@ -129,4 +140,5 @@ function validateRegister(registerData) {
   });
 }
 
-module.exports = { register, logIn };
+
+module.exports = { register, logIn, isUserIdInDb };

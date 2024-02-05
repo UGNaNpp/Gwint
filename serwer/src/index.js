@@ -2,11 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const cors = require("cors");
-const Yup = require("yup");
-const { MongoClient, ObjectId } = require("mongodb");
-const passwords = require("./../passwords.json");
-const { logIn } = require("./login");
-const register = require("./login").register;
+const { logIn, register } = require("./login");
+const {createGame} = require("./createGame");
 
 app.use(express.text({ type: "text/*" }));
 app.use(bodyParser.json());
@@ -31,6 +28,7 @@ app.post("/register", (req, res) => {
     });
 });
 
+// wymaga email i password
 app.post("/login", (req, res) => {
   const logInData = req.body;
   logIn(logInData)
@@ -39,6 +37,17 @@ app.post("/login", (req, res) => {
       res.status(401).send(err.message);
     });
 });
+
+// wymaga creatorId
+app.post("/new-game", (req, res) => {
+  const creatorId = req.body.creatorId;
+  createGame(creatorId)
+  .then(result => res.status(201).send(result))
+  .catch(err => {
+      console.error(err);
+      res.status(400).send(err.message)
+    })
+})
 
 app.listen(PORT, () => {
   console.log(`Server running at: http://localhost:${PORT}/`);
