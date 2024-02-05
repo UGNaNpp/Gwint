@@ -5,6 +5,7 @@ const cors = require("cors");
 const Yup = require("yup");
 const { MongoClient, ObjectId } = require("mongodb");
 const passwords = require("./../passwords.json");
+const { logIn } = require("./login");
 const register = require("./login").register;
 
 app.use(express.text({ type: "text/*" }));
@@ -27,6 +28,15 @@ app.post("/register", (req, res) => {
           break;
         }
       }
+    });
+});
+
+app.post("/login", (req, res) => {
+  const logInData = req.body;
+  logIn(logInData)
+    .then((result) => res.status(202).send(result))
+    .catch((err) => {
+      res.status(401).send(err.message);
     });
 });
 
