@@ -2,6 +2,7 @@ const { MongoClient, ObjectId } = require("mongodb");
 const passwords = require("../passwords.json");
 const bcrypt = require("bcrypt");
 const Yup = require("yup");
+const { v4: uuidv4 } = require('uuid');
 
 
 const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
@@ -19,13 +20,14 @@ async function register(registerData) {
     const passwordHash = await hashPassword(registerData.password);
     const collection = client.db("Gwint").collection("Users");
     delete registerData.password;
+    const userId = uuidv4();
     const queryRes = await collection.insertOne({
       ...registerData,
+      userId: userId,
       points: 0,
       passwordHash: passwordHash,
     });
     await client.close();
-    const userId = queryRes.insertedId;
     return userId;
   }
 }
@@ -41,7 +43,7 @@ async function logIn(logInData) {
       queryRes.passwordHash
     );
     if (isPasswordCorrect) {
-      return queryRes._id.valueOf();
+      return queryRes.userId;
     } else {
       throw new Error("Incorrect password");
     }
@@ -55,9 +57,9 @@ function hashPassword(plainPassword) {
     bcrypt.hash(plainPassword, 10, function (err, hash) {
       if (err) {
         console.error("Error while hashing ", err);
-        reject(false);
+        reject("Problems occurent during hashing password");
       } else {
-        resolve(true);
+        resolve(hash);
       }
     });
   });
@@ -93,7 +95,7 @@ function comparePasswordWithHash(password, hashPassword) {
   async function isUserIdInDb (userId) {
     const client = new MongoClient(connectionString);
     const collection = client.db("Gwint").collection("Users");
-    const queryRes = await collection.findOne({_id: new ObjectId(userId)});
+    const queryRes = await collection.findOne({userId: userId});
   if (queryRes !== null) {
     return true;
   } else {

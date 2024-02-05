@@ -2,6 +2,7 @@ const { MongoClient, ObjectId } = require("mongodb");
 const { isUserIdInDb } = require("./login");
 const {allCards} = require("./Cards/allCards");
 const passwords = require("../passwords.json");
+const { v4: uuidv4 } = require('uuid');
 const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
 
 async function createGame(creatorId) {
@@ -32,9 +33,10 @@ function generateGameJSObj (creatorId) {
   }
 
   return {
+    gameId: uuidv4(),
     players: {
       player1: {
-        userId: new ObjectId(creatorId),
+        userId: creatorId,
         startDeck: genPlayerCards()
       },
       player2: {
