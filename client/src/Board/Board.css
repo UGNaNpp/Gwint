@@ -77,3 +77,10 @@ body {
   justify-content: center;
   flex-wrap: wrap;
 }
+
+.scores {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}

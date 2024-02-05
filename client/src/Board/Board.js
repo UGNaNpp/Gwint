@@ -26,6 +26,7 @@ const Board = () => {
 
   // aktualne punkty gracza
   const [score, setScore] = useState(0);
+  const [enemyScore, setEnemyScore] = useState(0);
 
   // tasowanie (losowe sortowanie) talii i danie pierwszych 10 graczowi i potem ponowne losowanie i danie przeciwnikowi
   useEffect(() => {
@@ -75,6 +76,8 @@ const Board = () => {
           return updatedState;
         });
 
+        setEnemyScore(prevScore => prevScore + botCard.power);
+
         setIsPlayerTurn(true); // gracz ma ruch
       }
     }, 1000);
@@ -82,8 +85,12 @@ const Board = () => {
 
   return (
     <div className="game">
-      <div className="score">Score: {score}</div>
+      <div className="scores">
+      <div className="score">Twój wynik: {score}</div>
+      <div className="score">Wynik przeciwnika: {enemyScore}</div>
+      </div>
       <div className="opponent-cards">
+
         {opponentCards.map((card, index) => (
           <CardDisplay key={index} {...card} />
         ))}
