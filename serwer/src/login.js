@@ -2,6 +2,8 @@ const { MongoClient, ObjectId } = require("mongodb");
 const passwords = require("../passwords.json");
 const bcrypt = require("bcrypt");
 const Yup = require("yup");
+const { reject } = require("lodash");
+const { query } = require("express");
 
 const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -29,19 +31,54 @@ async function register(registerData) {
   }
 }
 
+async function logIn(logInData) {
+  const client = new MongoClient(connectionString);
+  const collection = client.db("Gwint").collection("Users");
+  const queryRes = await collection.findOne({ email: logInData.email });
+  if (queryRes !== null) {
+    const isPasswordCorrect = await comparePasswordWithHash(
+      logInData.password,
+      queryRes.passwordHash
+    );
+    if (isPasswordCorrect) {
+      return queryRes._id.valueOf();
+    } else {
+      throw new Error("Incorrect password");
+    }
+  } else {
+    throw new Error("Email doesn't exist");
+  }
+}
+
 function hashPassword(plainPassword) {
   return new Promise((resolve, reject) => {
     bcrypt.hash(plainPassword, 10, function (err, hash) {
       if (err) {
         console.error("Error while hashing ", err);
-        reject("Problems occurent during hashing password");
+        reject(false);
       } else {
-        resolve(hash);
+        resolve(true);
       }
     });
   });
 }
 
+//boolean
+function comparePasswordWithHash(password, hashPassword) {
+  return new Promise(
+    (resolve, reject) => {
+      bcrypt.compare(password, hashPassword, (err, result) => {
+        if (err) {
+          reject(false);
+        } else {
+          resolve(result)
+        }
+      });
+    })
+
+}
+
+// TODO zablokowanie 2 takich samych nazw użytkownika
 async function isEmaiInDb(email) {
   const client = new MongoClient(connectionString);
   const collection = client.db("Gwint").collection("Users");
@@ -92,4 +129,4 @@ function validateRegister(registerData) {
   });
 }
 
-module.exports = { register };
+module.exports = { register, logIn };
