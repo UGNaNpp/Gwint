@@ -1,0 +1,5 @@
+stworzyc plansze z 6 rzędami,
+gracz będzie miał tablice z aktualnie posiadanymi kartami, wyswietlającą się na dole.
+tablica z kartami położonymi (może dla każdego rzędu osobna)
+karty położone będą się wyświetlały w odpowiednim rzędzie
+z lewej strony ekranu licznik aktualnie posiadanych punktów
