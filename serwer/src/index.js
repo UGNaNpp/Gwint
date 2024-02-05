@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const cors = require("cors");
 const { logIn, register } = require("./login");
-const {createGame} = require("./createGame");
+const { createGame } = require("./createGame");
 
 app.use(express.text({ type: "text/*" }));
 app.use(bodyParser.json());
@@ -42,12 +42,12 @@ app.post("/login", (req, res) => {
 app.post("/new-game", (req, res) => {
   const creatorId = req.body.creatorId;
   createGame(creatorId)
-  .then(result => res.status(201).send(result))
-  .catch(err => {
+    .then((result) => res.status(201).send(result))
+    .catch((err) => {
       console.error(err);
-      res.status(400).send(err.message)
-    })
-})
+      res.status(400).send(err.message);
+    });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at: http://localhost:${PORT}/`);

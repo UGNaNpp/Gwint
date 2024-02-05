@@ -2,8 +2,7 @@ const { MongoClient, ObjectId } = require("mongodb");
 const passwords = require("../passwords.json");
 const bcrypt = require("bcrypt");
 const Yup = require("yup");
-const { v4: uuidv4 } = require('uuid');
-
+const { v4: uuidv4 } = require("uuid");
 
 const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -36,7 +35,7 @@ async function logIn(logInData) {
   const client = new MongoClient(connectionString);
   const collection = client.db("Gwint").collection("Users");
   const queryRes = await collection.findOne({ email: logInData.email });
-  await client.close()
+  await client.close();
   if (queryRes !== null) {
     const isPasswordCorrect = await comparePasswordWithHash(
       logInData.password,
@@ -67,42 +66,39 @@ function hashPassword(plainPassword) {
 
 //boolean
 function comparePasswordWithHash(password, hashPassword) {
-  return new Promise(
-    (resolve, reject) => {
-      bcrypt.compare(password, hashPassword, (err, result) => {
-        if (err) {
-          reject(false);
-        } else {
-          resolve(result)
-        }
-      });
-    })
-    
-  }
-  
-  async function isEmaiInDb(email) {
-    const client = new MongoClient(connectionString);
-    const collection = client.db("Gwint").collection("Users");
-    const queryRes = await collection.findOne({
-      email: email,
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, hashPassword, (err, result) => {
+      if (err) {
+        reject(false);
+      } else {
+        resolve(result);
+      }
     });
-    await client.close();
-    if (queryRes === null) return false;
-    else return true;
-  }
+  });
+}
 
+async function isEmaiInDb(email) {
+  const client = new MongoClient(connectionString);
+  const collection = client.db("Gwint").collection("Users");
+  const queryRes = await collection.findOne({
+    email: email,
+  });
+  await client.close();
+  if (queryRes === null) return false;
+  else return true;
+}
 
-  async function isUserIdInDb (userId) {
-    const client = new MongoClient(connectionString);
-    const collection = client.db("Gwint").collection("Users");
-    const queryRes = await collection.findOne({userId: userId});
+async function isUserIdInDb(userId) {
+  const client = new MongoClient(connectionString);
+  const collection = client.db("Gwint").collection("Users");
+  const queryRes = await collection.findOne({ userId: userId });
   if (queryRes !== null) {
     return true;
   } else {
     return false;
   }
-  }
-  
+}
+
 function validateRegister(registerData) {
   return new Promise((resolve, reject) => {
     Yup.object({
@@ -141,6 +137,5 @@ function validateRegister(registerData) {
       );
   });
 }
-
 
 module.exports = { register, logIn, isUserIdInDb };
