@@ -5,6 +5,7 @@ const cors = require("cors");
 const { logIn, register } = require("./login");
 const { createGame } = require("./createGame");
 
+app.use(cors());
 app.use(express.text({ type: "text/*" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

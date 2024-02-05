@@ -13,4 +13,12 @@ export default class Card {
         this.cardClass = cardClass;
         this.name = name;
     }
+
+    static createFromJSObject(inputData) {
+        if (("power" in inputData && "cardClass" in inputData && "name" in inputData)) {
+            return new Card(inputData.power, inputData.cardClass, inputData.name)
+        } else {
+            throw new Error("Ivalid input object")
+        }
+    }
 }
