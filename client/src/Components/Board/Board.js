@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import allCards from '../Cards/allCards.js';
 import CardDisplay from './CardDisplay.js';
 import './Board.css';
+import axios from 'axios';
+import Card from "./../Cards/Card.js"
+const config = require("./../../Resources/config.json");
+const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO zrób to z ciasteczka
+// ! Jeśli ja kiedyś zostawię tyle komentarzy w kodzie błagam przyjdzcie i mnie ubijcie.
+// ! Jak na moje oko ten kod jest świetnie samokomentujący więc to nie jest potrzebne.
 
 const Board = () => {
-  // karty przydzielone graczowi (karty w ręce)
   const [playerCards, setPlayerCards] = useState([]);
+  const [opponentCards, setOpponentCards] = useState([]);
+
 
   // karty na planszy gracza
   const [playerCardsOnBoard, setPlayerCardsOnBoard] = useState({
@@ -14,8 +20,6 @@ const Board = () => {
     ballista: [],
   });
 
-  // karty przydzielone przeciwnikowi
-  const [opponentCards, setOpponentCards] = useState([]);
 
   // karty na planszy przeciwnika
   const [opponentCardsOnBoard, setOpponentCardsOnBoard] = useState({
@@ -26,17 +30,21 @@ const Board = () => {
 
   // aktualne punkty gracza
   const [score, setScore] = useState(0);
-
-  // tasowanie (losowe sortowanie) talii i danie pierwszych 10 graczowi i potem ponowne losowanie i danie przeciwnikowi
+  startGame()
   useEffect(() => {
-    let playerDeck = [...allCards];
-    playerDeck.sort(() => Math.random() - 0.5);
-    setPlayerCards(playerDeck.slice(0, 10));
 
-    let opponentDeck = [...allCards];
-    opponentDeck.sort(() => Math.random() - 0.5);
-    setOpponentCards(opponentDeck.slice(0, 10));
   }, []);
+
+  function startGame() {
+    axios
+    .post(`${config.serverURL}/new-game`, {creatorId: developUserId})
+    .then((response) => {
+      console.log(response)
+    setPlayerCards(response.data.playerDeck.map((card) => Card.createFromJSObject(card)))
+    setOpponentCards(response.data.opponentDeck.map((card) => Card.createFromJSObject(card))) //! tylko developersko
+    })
+    .catch(err => console.error(err))
+  }
 
   // czy gracz ma teraz ruch
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);

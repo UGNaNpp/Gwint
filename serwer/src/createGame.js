@@ -16,6 +16,7 @@ async function createGame(creatorId) {
     const response = {
       gameId: gameId,
       playerDeck: gameJSObj.players.player1.startDeck,
+      opponentDeck: gameJSObj.players.player2.startDeck //! Tylko w fazie testowej
     };
     return response;
   } else {
