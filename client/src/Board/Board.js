@@ -86,8 +86,16 @@ const Board = () => {
   return (
     <div className="game">
       <div className="scores">
-      <div className="score">Twój wynik: {score}</div>
-      <div className="score">Wynik przeciwnika: {enemyScore}</div>
+        <div className="score">
+          Twój wynik: {score}
+          <div className="cristal"></div>
+          <div className="cristal"></div>
+        </div>
+        <div className="score">
+          Wynik przeciwnika: {enemyScore}
+          <div className="cristal"></div>
+          <div className="cristal"></div>
+        </div>
       </div>
       <div className="opponent-cards">
 
