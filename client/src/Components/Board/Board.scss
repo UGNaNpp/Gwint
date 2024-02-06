@@ -48,6 +48,7 @@ body {
   background-color: #d4edda;
 }
 
+
 .cards {
   display: flex;
   justify-content: center;
@@ -84,11 +85,11 @@ body {
   transform: translateY(-50%);
 }
 
-.cristal {
+.cristal  {
   display: inline-block;
   width: 10px;
   height: 10px;
   margin-left: 5px;
   background-color: red;
   border-radius: 50%;
-}/*# sourceMappingURL=Board.css.map */
+}
