@@ -36,7 +36,7 @@ async function logIn(logInData) {
   const collection = client.db("Gwint").collection("Users");
   const queryRes = await collection.findOne({ email: logInData.email });
   await client.close();
-  if (queryRes !== null) {
+  if (queryRes !== null) { //TODO sprawdzenie czy niepusty JSON zawiera wymagane pola
     const isPasswordCorrect = await comparePasswordWithHash(
       logInData.password,
       queryRes.passwordHash
@@ -77,6 +77,7 @@ function comparePasswordWithHash(password, hashPassword) {
   });
 }
 
+// TODO to chujowo (wcale) nie działa przy zapytaniu z przeglądarki
 async function isEmaiInDb(email) {
   const client = new MongoClient(connectionString);
   const collection = client.db("Gwint").collection("Users");

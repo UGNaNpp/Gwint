@@ -4,11 +4,13 @@ import "./Board.css";
 import axios from "axios";
 import Card from "./../Cards/Card.js";
 const config = require("./../../Resources/config.json");
-const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO zrób to z ciasteczka
+
 //TODO Co po wyczerpaniu kart? Front i backend
 //TODO Backend obsługuje nie pojedyńcze rundy a całe gry, po kilka rund jako jeden dokument mając i wygranych cząstkowych i finalnych.
 
 const Board = () => {
+  const [userID, setUserId] = useState("")
+
   const [playerCards, setPlayerCards] = useState([]);
   const [opponentCards, setOpponentCards] = useState([]);
 
@@ -24,31 +26,37 @@ const Board = () => {
     ballista: [],
   });
 
-
   
-  const resetBoard= () => {
-    setPlayerCardsOnBoard({
-      melee: [],
-    ranged: [],
-    ballista: [],
-    });
-    setOpponentCardsOnBoard({
-      melee: [],
-    ranged: [],
-    ballista: [],
-    });
-  };
-
+  
   useEffect(() => {
     startGame();
   }, []);
-
-
+  
+  
   function startGame() {
+    function resetBoard () {
+      setPlayerCardsOnBoard({
+        melee: [],
+      ranged: [],
+      ballista: [],
+      });
+      setOpponentCardsOnBoard({
+        melee: [],
+      ranged: [],
+      ballista: [],
+      });
+    };
+
+    const getCookie = (name) => {
+      const cookies = document.cookie.split(';');
+      const cookie = cookies.find(cookie => cookie.trim().startsWith(name + '='));
+      return cookie ? cookie.split('=')[1] : null;
+    };
+
+    setUserId(getCookie("userID"))
     resetBoard();
-    console.log("NCHew game request was sent");
     axios
-      .post(`${config.serverURL}/new-game`, { creatorId: developUserId })
+      .post(`${config.serverURL}/new-game`, { creatorId: userID })
       .then((response) => {
         console.log(response);
         setPlayerCards(
@@ -63,27 +71,26 @@ const Board = () => {
       .catch((err) => console.error(err));
   }
 
-  // aktualne punkty gracza
+
   const [score, setScore] = useState(0);
   const [enemyScore, setEnemyScore] = useState(0);
 
-  //logika spasowania oraz kryształy
   const [playerPassed, setPlayerPassed] = useState(false);
   const [opponentPassed, setOpponentPassed] = useState(false);
-
+  const [playerCrystals, setPlayerCrystals] = useState(2);
+  const [opponentCrystals, setOpponentCrystals] = useState(2);
+  
   useEffect(() => {
     console.log(playerPassed);
   }, [playerPassed]);
 
-  const [playerCrystals, setPlayerCrystals] = useState(2);
-  const [opponentCrystals, setOpponentCrystals] = useState(2);
   const [botMoves, setBotMoves] = useState(0);
 
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
 
   const handleCardClick = (card) => {
     if (!isPlayerTurn || playerPassed) {
-      return; // jak nie masz ruchu lub spasowałeś to nie klikniesz
+      return; 
     }
 
     // po kliknieciu
