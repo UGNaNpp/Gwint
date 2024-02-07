@@ -1,9 +1,10 @@
 const { MongoClient, ObjectId } = require("mongodb");
 const { isUserIdInDb } = require("./login");
 const { allCards } = require("./Cards/allCards");
-const passwords = require("../passwords.json");
+const config = require("./../config.json");
 const { v4: uuidv4 } = require("uuid");
-const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
+const connectionString = config.mongo.connection;
+
 
 async function createGame(creatorId) {
   if (await isUserIdInDb(creatorId)) {

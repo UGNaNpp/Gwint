@@ -1,10 +1,10 @@
 const { MongoClient, ObjectId } = require("mongodb");
-const passwords = require("../passwords.json");
 const bcrypt = require("bcrypt");
 const Yup = require("yup");
 const { v4: uuidv4 } = require("uuid");
+const config = require("./../config.json");
 
-const connectionString = `mongodb+srv://${passwords.mongo.username}:${passwords.mongo.password}@cluster0.0xx1rb1.mongodb.net/?retryWrites=true&w=majority`;
+const connectionString = config.mongo.connection;
 
 async function register(registerData) {
   const validationRes = await validateRegister(registerData);
