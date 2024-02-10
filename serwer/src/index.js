@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 const { logIn, register } = require("./login");
 const { createGame } = require("./createGame");
+const {basicHandleMove} = require("./GameRuntime/handleMove")
 
 app.use(cors());
 app.use(express.text({ type: "text/*" }));
@@ -49,6 +50,11 @@ app.post("/new-game", (req, res) => {
       res.status(400).send(err.message);
     });
 });
+
+// takes gameId, userId, cardData
+app.post("/move", (req, res) => {
+  
+})
 
 app.listen(PORT, () => {
   console.log(`Server running at: http://localhost:${PORT}/`);

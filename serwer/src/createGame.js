@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const connectionString = config.mongo.connection;
 
 
-async function createGame(creatorId) {
+async function createGame(creatorId, opponentId= null) {
   if (await isUserIdInDb(creatorId)) {
     const client = new MongoClient(connectionString);
     const collection = client.db("Gwint").collection("Games");
@@ -17,7 +17,6 @@ async function createGame(creatorId) {
     const response = {
       gameId: gameId,
       playerDeck: gameJSObj.players.player1.startDeck,
-      opponentDeck: gameJSObj.players.player2.startDeck //! Tylko w fazie testowej
     };
     return response;
   } else {
@@ -25,7 +24,7 @@ async function createGame(creatorId) {
   }
 }
 
-function generateGameJSObj(creatorId) {
+function generateGameJSObj(creatorId, opponentId = null) {
   function genPlayerCards() {
     let playerDeck = [...allCards];
     playerDeck.sort(() => Math.random() - 0.5);
@@ -37,14 +36,16 @@ function generateGameJSObj(creatorId) {
     players: {
       player1: {
         userId: creatorId,
-        startDeck: genPlayerCards(),
+        actDeck: genPlayerCards(),
       },
       player2: {
-        userId: null,
-        startDeck: genPlayerCards(),
+        userId: opponentId,
+        actDeck: genPlayerCards(),
       },
     },
+    rounds:[],
     generationTime: new Date(),
+    active: true
   };
 }
 
