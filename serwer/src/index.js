@@ -4,7 +4,7 @@ const app = express();
 const cors = require("cors");
 const { logIn, register } = require("./login");
 const { createGame } = require("./createGame");
-const {basicHandleMove} = require("./GameRuntime/handleMove")
+const {handleMove} = require("./GameRuntime/handleMove")
 
 app.use(cors());
 app.use(express.text({ type: "text/*" }));
@@ -51,9 +51,15 @@ app.post("/new-game", (req, res) => {
     });
 });
 
-// takes gameId, userId, cardData
+// takes gameId, userId, cardData(potem pewnie będzie po id)
 app.post("/move", (req, res) => {
-  
+  console.log("Odebrałem wiadomość")
+  handleMove(req.body)
+  .then((result) => res.status(201).send(result))
+    .catch((err) => {
+      console.error(err);
+      res.status(400).send(err.message);
+    });
 })
 
 app.listen(PORT, () => {

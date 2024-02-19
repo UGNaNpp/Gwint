@@ -1,8 +1,8 @@
 const { MongoClient, ObjectId } = require("mongodb");
 const { isUserIdInDb } = require("./login");
 const { allCards } = require("./Cards/allCards");
-const config = require("./../config.json");
 const { v4: uuidv4 } = require("uuid");
+const config = require("./../config.json");
 const connectionString = config.mongo.connection;
 
 
@@ -37,13 +37,16 @@ function generateGameJSObj(creatorId, opponentId = null) {
       player1: {
         userId: creatorId,
         actDeck: genPlayerCards(),
+        actPassed: false,
+        history:[]
       },
       player2: {
+        history:[],
+        actPassed: false,
         userId: opponentId,
         actDeck: genPlayerCards(),
       },
     },
-    rounds:[],
     generationTime: new Date(),
     active: true
   };
