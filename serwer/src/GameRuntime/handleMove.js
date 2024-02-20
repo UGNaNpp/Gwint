@@ -3,6 +3,7 @@ const easyBot = require("./easyBot");
 const config = require("./../../config.json");
 const connectionString = config.mongo.connection;
 
+//TODO logika końca gry
 // TODO gra po passie gracza
 // Rozdziela co dalej w zależności czy gramy z botem (i jakim) czy graczem
 async function handleMove(moveData) {
@@ -13,7 +14,6 @@ async function handleMove(moveData) {
   }
   insertMoveIntoDb(moveData, "player1");
 
-  console.dir(gameData, {depth: null});
   switch (gameData.players.player2.userId) {
     case "bot1": {
       const usedByBot =  await easyBot.usedCard(gameData.players.player2.actDeck);
@@ -66,11 +66,13 @@ async function insertMoveIntoDb(moveData, playerNumber) {
       $push: { [`players.${playerNumber}.history`]: moveData.cardData },
       $pull: { [`players.${playerNumber}.actDeck`]: moveData.cardData },
     }
-  );
-  //? nie mam pewności jak to się nazywa w linii niżej
-  return queryRes.updatedCount === 1 ? true : false;
-}
+    );
+    //? nie mam pewności jak to się nazywa w linii niżej
+    return queryRes.updatedCount === 1 ? true : false;
+  }
 
+  
+//TODO validacja czy mamy kartę której chcemy użyć
 //boolean
 async function checkMovePossibilitty(gameData, moveData) {
   if (moveData.userId == gameData.players.player1.userId) {

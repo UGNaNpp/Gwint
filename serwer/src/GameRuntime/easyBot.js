@@ -6,8 +6,8 @@
 async function usedCard (myCards) {
   // TODO przetestować poniższą linijkę 
   const actCardIndex = Math.floor(Math.random() * myCards.length);
-  console.log("Indeks karty wybranej przez bota", actCardIndex);
-  return actCardIndex;
+  console.log("dane karty wybranej przez bota", myCards[actCardIndex]);
+  return myCards[actCardIndex];
 }
 
 module.exports = {usedCard};
