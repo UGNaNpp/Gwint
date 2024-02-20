@@ -53,7 +53,6 @@ app.post("/new-game", (req, res) => {
 
 // takes gameId, userId, cardData(potem pewnie będzie po id)
 app.post("/move", (req, res) => {
-  console.log("Odebrałem wiadomość")
   handleMove(req.body)
   .then((result) => res.status(201).send(result))
     .catch((err) => {

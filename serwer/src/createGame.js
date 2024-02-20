@@ -24,6 +24,7 @@ async function createGame(creatorId, opponentId= null) {
   }
 }
 
+// TODO SERVER MUSI USTAWIAĆ PRZY TWORZENIU ID OPPONENTA dla bezpieczeństwa
 function generateGameJSObj(creatorId, opponentId = null) {
   function genPlayerCards() {
     let playerDeck = [...allCards];
@@ -52,4 +53,6 @@ function generateGameJSObj(creatorId, opponentId = null) {
   };
 }
 
-module.exports = { createGame };
+
+
+module.exports = { createGame};
