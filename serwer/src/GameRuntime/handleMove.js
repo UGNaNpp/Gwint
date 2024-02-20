@@ -14,16 +14,15 @@ async function handleMove(moveData) {
   insertMoveIntoDb(moveData, "player1");
 
   console.dir(gameData, {depth: null});
-  console.log(gameData.players.player2.userId);
   switch (gameData.players.player2.userId) {
     case "bot1": {
-      console.log("Ogarnąłem że to gra bot")
-      const usedByBot = easyBot.usedCard(gameData.players.player2.actDeck);
+      const usedByBot =  await easyBot.usedCard(gameData.players.player2.actDeck);
       const botMoveData = {
         gameId: moveData.gameId,
         cardData: usedByBot,
         userId: "bot1",
       };
+      console.log(botMoveData);
       insertMoveIntoDb(botMoveData, "player2");
       return botMoveData;
     }
@@ -49,7 +48,7 @@ async function getGameData(gameId) {
   ]).toArray();
   await client.close();
   // console.dir(gameData, {depth: null});
-  if (gameData == null) {
+  if (gameData.length == 0) {
     throw new Error("No active game with this id");
   } else {
     return gameData[0];
@@ -68,7 +67,7 @@ async function insertMoveIntoDb(moveData, playerNumber) {
       $pull: { [`players.${playerNumber}.actDeck`]: moveData.cardData },
     }
   );
-  //! nie mam pewności jak to się nazywa w linii niżej
+  //? nie mam pewności jak to się nazywa w linii niżej
   return queryRes.updatedCount === 1 ? true : false;
 }
 
