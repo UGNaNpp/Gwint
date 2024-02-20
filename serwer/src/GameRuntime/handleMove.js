@@ -5,50 +5,57 @@ const connectionString = config.mongo.connection;
 
 //TODO logika końca rozgrywki
 // TODO gra po passie gracza
-// Rozdziela co dalej w zależności czy gramy z botem (i jakim) czy graczem
+
 async function handleMove(moveData) {
-  const gameData = await getGameData(moveData.gameId);
+  console.log("siema, rozpoczynam obsługę ruchu");
+  const gameId = moveData.gameId;
+  const gameData = await getGameData(gameId);
   // TODO drzewo jeśli otrzymaliśmy ruch od player2
 
   if (moveData.cardData === null) {
-    handlePass(moveData.gameId, "player1");
+    handlePass(gameId, "player1");
   } else {
     if (!checkMovePossibilitty(gameData, moveData)) {
       throw new Error("Move is impossible");
     }
     insertMoveIntoDb(moveData, "player1");
+  }
 
     switch (gameData.players.player2.actPassed) {
       case true:
         return null;
-      case false: 
-        
-      switch (gameData.players.player2.userId) {
-        case "bot1": {
-          const usedByBot = await easyBot.usedCard(
-          gameData.players.player2.actDeck
-        );
-        const botMoveData = {
-          gameId: moveData.gameId,
-          cardData: usedByBot,
-          userId: "bot1",
-        };
-        console.log(botMoveData);
-        insertMoveIntoDb(botMoveData, "player2");
-
-        if (gameData.players.player1.actPassed) {
-          handleMove(moveData) // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
-        } else {
-          return await getPublicGameData(gameId);
+      case false:
+        switch (gameData.players.player2.userId) {
+          case "bot1": {
+            const usedByBot = await easyBot.makeMove(
+              gameData.players.player2.actDeck
+            );
+            console.dir(usedByBot, {depth:null});
+            if (usedByBot === null) {
+              handlePass(gameId, "player2");
+              return await getPublicGameData(gameId);
+            } else {
+              const botMoveData = {
+                gameId: moveData.gameId,
+                cardData: usedByBot,
+                userId: "bot1",
+              };
+              console.log(botMoveData);
+              insertMoveIntoDb(botMoveData, "player2");
+              
+              console.log(gameData.players.player1.actPassed)
+              if (gameData.players.player1.actPassed) {
+                handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
+              } else {
+                return await getPublicGameData(gameId);
+              }
+            }
+            }
+          default: {
+            // TODO gra player-player
+          }
         }
-        
-      }
-      default: {
-        // TODO gra player-player
-      }
     }
-  }
-  }
 }
 
 async function getGameData(gameId) {
@@ -78,9 +85,9 @@ async function getGameData(gameId) {
 
 async function getPublicGameData(gameId) {
   let dataToSend = await getGameData(gameId);
-  delete dataToSend.player1.actDeck
-  delete dataToSend.player2.actDeck
-  return dataToSend
+  // delete dataToSend.player1.actDeck;
+  // delete dataToSend.player2.actDeck;
+  return dataToSend;
 }
 
 //TODO dodanie czasu wykonania ruchu do historii i restrukturyzacja nazwy
@@ -99,7 +106,7 @@ async function insertMoveIntoDb(moveData, playerNumber) {
   return queryRes.updatedCount === 1 ? true : false;
 }
 
-//TODO validacja czy mamy kartę której chcemy użyć
+//TODO Na ogół to poniżej nie działą XD
 //boolean
 async function checkMovePossibilitty(gameData, moveData) {
   if (moveData.userId == gameData.players.player1.userId) {
@@ -118,20 +125,20 @@ async function handlePass(gameId, playerNumber) {
   }
 
   async function updatePassInDB() {
-    await client.updateOne(
+    await collection.updateOne(
       {
         gameId: gameId,
         active: true,
       },
       {
-        $set: { [`players.${oppositePlayer(playerNumber)}.actPassed`]: true },
+        $set: { [`players.${playerNumber}.actPassed`]: true },
       }
     );
   }
 
   const client = new MongoClient(connectionString);
   const collection = client.db("Gwint").collection("Games");
-  const passInfo = await collection
+  let actPassed = await collection
     .aggregate([
       {
         $match: { gameId: gameId, active: true },
@@ -139,29 +146,31 @@ async function handlePass(gameId, playerNumber) {
       {
         $project: {
           _id: 0,
-          "player1.actPassed": 1,
-          "player2.actPassed": 1,
+          player1: "$players.player1.actPassed",
+          player2: "$players.player2.actPassed",
         },
       },
     ])
-    .toArray()
-    .next();
-  console.log(passInfo);
+    .toArray();
+    actPassed = actPassed[0];
+  console.dir(actPassed, { depth: null });
 
-  console.log([`passInfo.${playerNumber}.passInfo`]);
-  switch ([`passInfo.${playerNumber}.passInfo`]) {
-    case true:
-      throw new Error("Player have passed before, so it is impossible now");
+  // console.log(actPassed[playerNumber]);
+  switch (actPassed[playerNumber]) {
+    // ! Testowo można spasować nawet jak się wcześniej spasowało
+    // case true:                   
+    //   throw new Error("Player have passed before, so it is impossible now");
     default:
-      switch ([`passInfo.${oppositePlayer(playerNumber)}.passInfo`]) {
+      switch (actPassed[oppositePlayer(playerNumber)]) {
         case true:
         //TODO obaj gracze spassowali
+        break;
         default:
           updatePassInDB();
       }
   }
 
-  await client.close();
+  // await client.close();
 }
 
 module.exports = { handleMove };
