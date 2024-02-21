@@ -93,3 +93,7 @@ body {
   background-color: red;
   border-radius: 50%;
 }
+
+.passButton {
+  background-color: red;
+}

@@ -163,7 +163,9 @@ const Board = () => {
           Twój wynik: {score}
           <div className="cristal"></div>
           <div className="cristal"></div>
-          <button onClick={handlePassClick}>Spasuj</button>
+          <button onClick={handlePassClick}
+          className="passButton"
+          >Spasuj</button>
         </div>
         <div className="score">
           Wynik przeciwnika: {enemyScore}
