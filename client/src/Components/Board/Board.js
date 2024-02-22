@@ -8,40 +8,59 @@ const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO userId z ci
 
 const Board = () => {
   const [playerCards, setPlayerCards] = useState([]);
-  const [gameId, setGameId] = useState("Not known")
+  const [gameId, setGameId] = useState("Not known");
 
-  function moveDataToSend (cardData = null) {
+  function moveDataToSend(cardData = null) {
     return {
       gameId: gameId,
       userId: developUserId,
-      cardData: cardData
+      cardData: cardData,
+    };
+  }
+
+  const emptyHalfBoard = {
+    melee: [],
+    ranged: [],
+    ballista: [],
+  };
+
+  const [playerCardsOnBoard, setPlayerCardsOnBoard] = useState(emptyHalfBoard);
+
+  const [opponentCardsOnBoard, setOpponentCardsOnBoard] =
+    useState(emptyHalfBoard);
+
+  function groupCardsOnBoard(cards, actBoard = emptyHalfBoard) {
+    switch (cards.length) {
+      case 0:
+        return actBoard;
+      default:
+        const firstElement = cards.shift();
+        switch (firstElement.cardClass) {
+          case "melee":
+            return groupCardsOnBoard(cards, {
+              ...actBoard,
+              melee: [...actBoard.melee, firstElement],
+            });
+          case "ranged":
+            return groupCardsOnBoard(cards, {
+              ...actBoard,
+              ranged: [...actBoard.ranged, firstElement],
+            });
+          case "ballista":
+            return groupCardsOnBoard(cards, {
+              ...actBoard,
+              ballista: [...actBoard.ballista, firstElement],
+            });
+          default:
+            throw new Error("Incorrect card class");
+        }
     }
   }
 
-  const [playerCardsOnBoard, setPlayerCardsOnBoard] = useState({
-    melee: [],
-    ranged: [],
-    ballista: [],
-  });
-
-  const [opponentCardsOnBoard, setOpponentCardsOnBoard] = useState({
-    melee: [],
-    ranged: [],
-    ballista: [],
-  });
-
   function startGame() {
     const resetBoard = () => {
-      setPlayerCardsOnBoard({
-        melee: [],
-        ranged: [],
-        ballista: [],
-      });
-      setOpponentCardsOnBoard({
-        melee: [],
-        ranged: [],
-        ballista: [],
-      });
+      setPlayerCardsOnBoard(emptyHalfBoard);
+      setOpponentCardsOnBoard(emptyHalfBoard);
     };
 
     resetBoard();
@@ -72,18 +91,16 @@ const Board = () => {
       });
     }
 
+    setPlayerCards(playerCards.filter(c => c !== card));
     actualiseBoard(card);
     // todo validacja czy rozpocząteo grę (mamy gameId) przed ruchem
     axios
-    .post(`${config.serverURL}/move`, moveDataToSend(card))
-    .then((response) => {
-      console.log(response);
-      // setPlayerCards(
-      //   response.data.playerDeck.map((card) => Card.createFromJSObject(card))
-      // );
-    })
-    .catch((err) => console.error(err));
-    
+      .post(`${config.serverURL}/move`, moveDataToSend(card))
+      .then((response) => {
+        console.log(response.data.players.player2.history);
+        setOpponentCardsOnBoard(groupCardsOnBoard(response.data.players.player2.history)); // format danych się zmieni
+      })
+      .catch((err) => console.error(err));
   };
 
   const handlePassClick = () => {
@@ -93,9 +110,7 @@ const Board = () => {
   // TODO przeniesienie wyświetlania planszy do innego pliku
   return (
     <div className="game">
-      <p>
-          Id gry:   {gameId}
-      </p>
+      <p>Id gry: {gameId}</p>
       <div className="scores">
         <div className="score">
           Twój wynik: Score
@@ -153,6 +168,6 @@ const Board = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Board;
