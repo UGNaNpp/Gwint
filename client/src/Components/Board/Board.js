@@ -4,12 +4,10 @@ import "./Board.css";
 import axios from "axios";
 import Card from "./../Cards/Card.js";
 const config = require("./../../Resources/config.json");
-const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO zrób to z ciasteczka
+const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO userId z ciasteczka stworzonego podczas logowania
 
 const Board = () => {
-  // karty przydzielone graczowi (karty w ręce)
   const [playerCards, setPlayerCards] = useState([]);
-  const [opponentCards, setOpponentCards] = useState([]);
 
   // karty na planszy gracza
   const [playerCardsOnBoard, setPlayerCardsOnBoard] = useState({
@@ -25,16 +23,6 @@ const Board = () => {
     ballista: [],
   });
 
-  // aktualne punkty gracza
-  const [score, setScore] = useState(0);
-  const [enemyScore, setEnemyScore] = useState(0);
-
-  //logika spasowania oraz kryształy
-  const [playerPassed, setPlayerPassed] = useState(false);
-  const [opponentPassed, setOpponentPassed] = useState(false);
-  const [playerCrystals, setPlayerCrystals] = useState(2);
-  const [opponentCrystals, setOpponentCrystals] = useState(2);
-
   function startGame() {
     const resetBoard = () => {
       setPlayerCardsOnBoard({
@@ -48,6 +36,7 @@ const Board = () => {
         ballista: [],
       });
     };
+
     resetBoard();
     axios
       .post(`${config.serverURL}/new-game`, { creatorId: developUserId })
@@ -56,11 +45,6 @@ const Board = () => {
         setPlayerCards(
           response.data.playerDeck.map((card) => Card.createFromJSObject(card))
         );
-        setOpponentCards(
-          response.data.opponentDeck.map((card) =>
-            Card.createFromJSObject(card)
-          )
-        ); //! tylko developersko
       })
       .catch((err) => console.error(err));
   }
@@ -69,130 +53,38 @@ const Board = () => {
     startGame();
   }, []);
 
-  useEffect(() => {
-    console.log(playerPassed);
-  }, [playerPassed]);
-
-  const [botMoves, setBotMoves] = useState(0);
-
-  // czy gracz ma teraz ruch
-  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
-
-  //  kliknięcie w kartę
   const handleCardClick = (card) => {
-    if (!isPlayerTurn || playerPassed) {
-      return; // jak nie masz ruchu lub spasowałeś to nie klikniesz
-    }
-
-    // po kliknieciu
-    setPlayerCards(playerCards.filter((c) => c !== card)); //usuwa karte z reki gracza
-    setPlayerCardsOnBoard((prevState) => {
-      //dodaje na plansze
-      const updatedState = {
-        ...prevState,
-        [card.cardClass]: [...prevState[card.cardClass], card],
-      };
-      return updatedState;
-    });
-    setScore((prevScore) => prevScore + card.power); //dodaje punkty. (później punkty powinny być liczone dla każdego rzędu z osobna)
-
-    if (!opponentPassed) {
-      setIsPlayerTurn(false);
-      botMove();
+    //TODO obsługa kliknięcia w kartę (wysłania jej)
+    function actualiseBoard(card) {
+      setPlayerCardsOnBoard((prevState) => {
+        const updatedState = {
+          ...prevState,
+          [card.cardClass]: [...prevState[card.cardClass], card],
+        };
+        return updatedState;
+      });
     }
   };
-
-  //jesli obydwoje gracze spasowali, koniec rundy i reset statystyk
-  if (playerPassed && opponentPassed) {
-    if (score > enemyScore) {
-      setOpponentCrystals((prevCrystals) => prevCrystals - 1);
-    } else if (score < enemyScore) {
-      setPlayerCrystals((prevCrystals) => prevCrystals - 1);
-    }
-
-    setPlayerPassed(false);
-    setOpponentPassed(false);
-    setScore(0);
-    setEnemyScore(0);
-    setBotMoves(0);
-  }
 
   const handlePassClick = () => {
-    //pasujemy
-    if (isPlayerTurn && !playerPassed) {
-      setPlayerPassed(true);
-      setIsPlayerTurn(false);
-
-      // Po spasowaniu gracza, bot wykonuje ruch
-      botMove(true);
-    }
+    //TODO obsługa przycisku pass
   };
 
-  useEffect(() => {
-    console.log(playerPassed);
-  }, [playerPassed]);
-
-  const botMove = (playerHasPassed) => {
-    setTimeout(() => {
-      if (opponentCards.length > 0 && !opponentPassed) {
-        const passChance = botMoves * 0.0; // szansa na spasowanie bota rośnie z każdym ruchem
-        const e = Math.random();
-        console.log(e, "musi byc mniejsze od ", passChance);
-        if (e < passChance) {
-          console.log("chlop spasował");
-          setOpponentPassed(true);
-          setIsPlayerTurn(true);
-        } else {
-          const botCardIndex = Math.floor(Math.random() * opponentCards.length);
-          const botCard = opponentCards[botCardIndex];
-          setBotMoves((prevMoves) => prevMoves + 1);
-
-          setOpponentCards(
-            opponentCards.filter((c, index) => index !== botCardIndex)
-          );
-          setOpponentCardsOnBoard((prevState) => {
-            const updatedState = {
-              ...prevState,
-              [botCard.cardClass]: [...prevState[botCard.cardClass], botCard],
-            };
-            return updatedState;
-          });
-
-          setEnemyScore((prevScore) => prevScore + botCard.power);
-          console.log("czy ja spasowalem?", playerHasPassed);
-
-          if (!playerHasPassed) {
-            // gracz ma ruch o ile wczesniej nie spasował
-            setIsPlayerTurn(true);
-          } else {
-            // Jeśli gracz spasował, bot wykonuje kolejny ruch
-            botMove(playerHasPassed);
-          }
-        }
-      }
-    }, 1000);
-  };
-
+  // TODO przeniesienie wyświetlania planszy do innego pliku
   return (
     <div className="game">
       <div className="scores">
         <div className="score">
-          Twój wynik: {score}
+          Twój wynik: Score
           <div className="cristal"></div>
           <div className="cristal"></div>
           <button onClick={handlePassClick}>Spasuj</button>
         </div>
         <div className="score">
-          Wynik przeciwnika: {enemyScore}
+          Wynik przeciwnika: Score przecinika
           <div className="cristal"></div>
           <div className="cristal"></div>
         </div>
-      </div>
-
-      <div className="opponent-cards">
-        {opponentCards.map((card, index) => (
-          <CardDisplay key={index} {...card} />
-        ))}
       </div>
       <div className="board">
         <div className="row opponent-row ballista">
@@ -227,7 +119,6 @@ const Board = () => {
           ))}
         </div>
       </div>
-
       <div className="cards">
         {playerCards.map((card, index) => (
           <CardDisplay
@@ -239,6 +130,6 @@ const Board = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Board;

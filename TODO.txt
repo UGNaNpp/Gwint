@@ -1,6 +1,0 @@
-algorytm pasowania bota niech zalezy od :
-- aktualnej roznicy punktow
-- jezeli bot nie ma szans ze swoimi aktualnymi kartami przekroczyc wyniku gracza, szansa spasowania to 1
-
-bug:
-jezeli gracz spasuje to dziwne rzeczy dzieją się w kartach przeciwnika - chłop ma nieskończoność kart
