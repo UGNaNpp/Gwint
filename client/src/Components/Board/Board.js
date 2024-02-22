@@ -8,15 +8,22 @@ const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO userId z ci
 
 const Board = () => {
   const [playerCards, setPlayerCards] = useState([]);
+  const [gameId, setGameId] = useState("Not known")
 
-  // karty na planszy gracza
+  function moveDataToSend (cardData = null) {
+    return {
+      gameId: gameId,
+      userId: developUserId,
+      cardData: cardData
+    }
+  }
+
   const [playerCardsOnBoard, setPlayerCardsOnBoard] = useState({
     melee: [],
     ranged: [],
     ballista: [],
   });
 
-  // karty na planszy przeciwnika
   const [opponentCardsOnBoard, setOpponentCardsOnBoard] = useState({
     melee: [],
     ranged: [],
@@ -41,7 +48,8 @@ const Board = () => {
     axios
       .post(`${config.serverURL}/new-game`, { creatorId: developUserId })
       .then((response) => {
-        console.log(response);
+        console.log("Utworzono nową grę");
+        setGameId(response.data.gameId);
         setPlayerCards(
           response.data.playerDeck.map((card) => Card.createFromJSObject(card))
         );
@@ -54,7 +62,6 @@ const Board = () => {
   }, []);
 
   const handleCardClick = (card) => {
-    //TODO obsługa kliknięcia w kartę (wysłania jej)
     function actualiseBoard(card) {
       setPlayerCardsOnBoard((prevState) => {
         const updatedState = {
@@ -64,6 +71,19 @@ const Board = () => {
         return updatedState;
       });
     }
+
+    actualiseBoard(card);
+    // todo validacja czy rozpocząteo grę (mamy gameId) przed ruchem
+    axios
+    .post(`${config.serverURL}/move`, moveDataToSend(card))
+    .then((response) => {
+      console.log(response);
+      // setPlayerCards(
+      //   response.data.playerDeck.map((card) => Card.createFromJSObject(card))
+      // );
+    })
+    .catch((err) => console.error(err));
+    
   };
 
   const handlePassClick = () => {
@@ -73,6 +93,9 @@ const Board = () => {
   // TODO przeniesienie wyświetlania planszy do innego pliku
   return (
     <div className="game">
+      <p>
+          Id gry:   {gameId}
+      </p>
       <div className="scores">
         <div className="score">
           Twój wynik: Score
