@@ -1,0 +1,7 @@
+  {
+    _id: ObjectId("65c60006dde0baef54562ece"),
+    name: 'bot wszystko losowe',
+    email: 'jestem.easy.bocik@bot',
+    userId: 'bot1',
+    points: 0
+  }

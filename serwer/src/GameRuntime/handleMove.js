@@ -30,7 +30,6 @@ async function handleMove(moveData) {
             const usedByBot = await easyBot.makeMove(
               gameData.players.player2.actDeck
             );
-            console.dir(usedByBot, {depth:null});
             if (usedByBot === null) {
               handlePass(gameId, "player2");
               return await getPublicGameData(gameId);
@@ -40,10 +39,8 @@ async function handleMove(moveData) {
                 cardData: usedByBot,
                 userId: "bot1",
               };
-              console.log(botMoveData);
               insertMoveIntoDb(botMoveData, "player2");
               
-              console.log(gameData.players.player1.actPassed)
               if (gameData.players.player1.actPassed) {
                 handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
               } else {
@@ -153,7 +150,6 @@ async function handlePass(gameId, playerNumber) {
     ])
     .toArray();
     actPassed = actPassed[0];
-  console.dir(actPassed, { depth: null });
 
   // console.log(actPassed[playerNumber]);
   switch (actPassed[playerNumber]) {
