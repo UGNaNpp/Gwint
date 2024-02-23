@@ -6,19 +6,21 @@ const connectionString = config.mongo.connection;
 //TODO logika końca rozgrywki
 // TODO gra po passie gracza
 
-async function handleMove(moveData) {
-  console.log("siema, rozpoczynam obsługę ruchu");
+async function handleMove(moveData, clearRun=false) {
   const gameId = moveData.gameId;
   const gameData = await getGameData(gameId);
   // TODO drzewo jeśli otrzymaliśmy ruch od player2
 
-  if (moveData.cardData === null) {
-    handlePass(gameId, "player1");
-  } else {
-    if (!checkMovePossibilitty(gameData, moveData)) {
-      throw new Error("Move is impossible");
+  if (clearRun == false) {
+    if (moveData.cardData === null) {
+      await handlePass(gameId, "player1");
+      gameData.players.player1.actPassed = true;
+    } else {
+      if (!checkMovePossibilitty(gameData, moveData)) {
+        throw new Error("Move is impossible");
+      }
+      await insertMoveIntoDb(moveData, "player1");
     }
-    insertMoveIntoDb(moveData, "player1");
   }
 
     switch (gameData.players.player2.actPassed) {
@@ -27,11 +29,11 @@ async function handleMove(moveData) {
       case false:
         switch (gameData.players.player2.userId) {
           case "bot1": {
-            const usedByBot = await easyBot.makeMove(
+            const usedByBot = easyBot.makeMove(
               gameData.players.player2.actDeck
             );
             if (usedByBot === null) {
-              handlePass(gameId, "player2");
+              // await handlePass(gameId, "player2");
               return await getPublicGameData(gameId);
             } else {
               const botMoveData = {
@@ -39,18 +41,14 @@ async function handleMove(moveData) {
                 cardData: usedByBot,
                 userId: "bot1",
               };
-              insertMoveIntoDb(botMoveData, "player2");
-              
+              await insertMoveIntoDb(botMoveData, "player2");
               if (gameData.players.player1.actPassed) {
-                handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
+                return await handleMove(moveData, true); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
               } else {
                 return await getPublicGameData(gameId);
               }
             }
             }
-          default: {
-            // TODO gra player-player
-          }
         }
     }
 }
@@ -72,14 +70,15 @@ async function getGameData(gameId) {
     ])
     .toArray();
   await client.close();
-  // console.dir(gameData, {depth: null});
   if (gameData.length == 0) {
     throw new Error("No active game with this id");
   } else {
+    // console.dir(gameData, {depth: null})
     return gameData[0];
   }
 }
 
+// Do refaktoryzacji - nie chcemy wysyłać pełnych info o grze
 async function getPublicGameData(gameId) {
   let dataToSend = await getGameData(gameId);
   // delete dataToSend.player1.actDeck;
@@ -99,7 +98,6 @@ async function insertMoveIntoDb(moveData, playerNumber) {
       $pull: { [`players.${playerNumber}.actDeck`]: moveData.cardData },
     }
   );
-  //? nie mam pewności jak to się nazywa w linii niżej
   return queryRes.updatedCount === 1 ? true : false;
 }
 
@@ -151,7 +149,6 @@ async function handlePass(gameId, playerNumber) {
     .toArray();
     actPassed = actPassed[0];
 
-  // console.log(actPassed[playerNumber]);
   switch (actPassed[playerNumber]) {
     // ! Testowo można spasować nawet jak się wcześniej spasowało
     // case true:                   
@@ -162,10 +159,12 @@ async function handlePass(gameId, playerNumber) {
         //TODO obaj gracze spassowali
         break;
         default:
-          updatePassInDB();
+          await updatePassInDB();
+          break;
+        }
       }
-  }
-
+      
+      await client.close();
   // await client.close();
 }
 

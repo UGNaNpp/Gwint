@@ -18,7 +18,7 @@ async function createGame(creatorId, opponentId= null) {
       gameId: gameId,
       playerDeck: gameJSObj.players.player1.actDeck,
     };
-    console.log(response);
+    // console.log(response);
     return response;
   } else {
     throw new Error("No creatorId in db");
