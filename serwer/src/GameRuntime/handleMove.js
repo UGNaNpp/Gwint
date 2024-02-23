@@ -7,15 +7,16 @@ const connectionString = config.mongo.connection;
 // TODO gra po passie gracza
 
 async function handleMove(moveData, clearRun=false) {
-  console.log(moveData, `Czy to clearRun?: ${clearRun}`)
+  console.log("siema, rozpoczynam pracę")
+  moveData.cardData === null ? console.log("Teraz spassowano\n") : null
   const gameId = moveData.gameId;
   const gameData = await getGameData(gameId);
   // TODO drzewo jeśli otrzymaliśmy ruch od player2
 
   if (clearRun == false) {
-    console.log(moveData)
     if (moveData.cardData === null) {
       await handlePass(gameId, "player1");
+      gameData.players.player1.actPassed = true;
     } else {
       if (!checkMovePossibilitty(gameData, moveData)) {
         throw new Error("Move is impossible");
@@ -43,7 +44,6 @@ async function handleMove(moveData, clearRun=false) {
                 userId: "bot1",
               };
               await insertMoveIntoDb(botMoveData, "player2");
-              
               if (gameData.players.player1.actPassed) {
                 await handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
               } else {
@@ -84,6 +84,7 @@ async function getGameData(gameId) {
 
 // Do refaktoryzacji - nie chcemy wysyłać pełnych info o grze
 async function getPublicGameData(gameId) {
+  console.log("Skończyłem przygotowywania do wysłania danych, żegnam");
   let dataToSend = await getGameData(gameId);
   // delete dataToSend.player1.actDeck;
   // delete dataToSend.player2.actDeck;
@@ -153,7 +154,6 @@ async function handlePass(gameId, playerNumber) {
     .toArray();
     actPassed = actPassed[0];
 
-  // console.log(actPassed[playerNumber]);
   switch (actPassed[playerNumber]) {
     // ! Testowo można spasować nawet jak się wcześniej spasowało
     // case true:                   

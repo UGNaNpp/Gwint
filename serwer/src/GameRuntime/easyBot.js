@@ -8,10 +8,7 @@ async function makeMove (myCards) {
   if (myCards.length === 0) {
     return null
   } else {
-
-    
     const actCardIndex = Math.floor(Math.random() * myCards.length);
-    console.log("dane karty wybranej przez bota", myCards[actCardIndex]);
     return myCards[actCardIndex];
   }
 }
