@@ -42,10 +42,10 @@ async function handleMove(moveData, clearRun=false) {
                 cardData: usedByBot,
                 userId: "bot1",
               };
-              insertMoveIntoDb(botMoveData, "player2");
+              await insertMoveIntoDb(botMoveData, "player2");
               
               if (gameData.players.player1.actPassed) {
-                handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
+                await handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
               } else {
                 return await getPublicGameData(gameId);
               }
