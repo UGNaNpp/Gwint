@@ -4,7 +4,7 @@
 // TODO implementacja losowego passa
 // * pass przesyłamy jako cardData = null
 // * jeśli pass przeciwnika zwraca null
-async function makeMove (myCards) {
+function makeMove (myCards) {
   if (myCards.length === 0) {
     return null
   } else {

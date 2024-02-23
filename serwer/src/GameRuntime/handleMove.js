@@ -7,8 +7,6 @@ const connectionString = config.mongo.connection;
 // TODO gra po passie gracza
 
 async function handleMove(moveData, clearRun=false) {
-  console.log("siema, rozpoczynam pracę")
-  moveData.cardData === null ? console.log("Teraz spassowano\n") : null
   const gameId = moveData.gameId;
   const gameData = await getGameData(gameId);
   // TODO drzewo jeśli otrzymaliśmy ruch od player2
@@ -31,11 +29,11 @@ async function handleMove(moveData, clearRun=false) {
       case false:
         switch (gameData.players.player2.userId) {
           case "bot1": {
-            const usedByBot = await easyBot.makeMove(
+            const usedByBot = easyBot.makeMove(
               gameData.players.player2.actDeck
             );
             if (usedByBot === null) {
-              await handlePass(gameId, "player2");
+              // await handlePass(gameId, "player2");
               return await getPublicGameData(gameId);
             } else {
               const botMoveData = {
@@ -45,15 +43,12 @@ async function handleMove(moveData, clearRun=false) {
               };
               await insertMoveIntoDb(botMoveData, "player2");
               if (gameData.players.player1.actPassed) {
-                await handleMove(moveData); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
+                return await handleMove(moveData, true); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
               } else {
                 return await getPublicGameData(gameId);
               }
             }
             }
-          default: {
-            // TODO gra player-player
-          }
         }
     }
 }
@@ -78,13 +73,13 @@ async function getGameData(gameId) {
   if (gameData.length == 0) {
     throw new Error("No active game with this id");
   } else {
+    // console.dir(gameData, {depth: null})
     return gameData[0];
   }
 }
 
 // Do refaktoryzacji - nie chcemy wysyłać pełnych info o grze
 async function getPublicGameData(gameId) {
-  console.log("Skończyłem przygotowywania do wysłania danych, żegnam");
   let dataToSend = await getGameData(gameId);
   // delete dataToSend.player1.actDeck;
   // delete dataToSend.player2.actDeck;
@@ -164,10 +159,12 @@ async function handlePass(gameId, playerNumber) {
         //TODO obaj gracze spassowali
         break;
         default:
-          updatePassInDB();
+          await updatePassInDB();
+          break;
+        }
       }
-  }
-
+      
+      await client.close();
   // await client.close();
 }
 
