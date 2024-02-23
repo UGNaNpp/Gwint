@@ -6,18 +6,22 @@ const connectionString = config.mongo.connection;
 //TODO logika końca rozgrywki
 // TODO gra po passie gracza
 
-async function handleMove(moveData) {
+async function handleMove(moveData, clearRun=false) {
+  console.log(moveData, `Czy to clearRun?: ${clearRun}`)
   const gameId = moveData.gameId;
   const gameData = await getGameData(gameId);
   // TODO drzewo jeśli otrzymaliśmy ruch od player2
 
-  if (moveData.cardData === null) {
-    handlePass(gameId, "player1");
-  } else {
-    if (!checkMovePossibilitty(gameData, moveData)) {
-      throw new Error("Move is impossible");
+  if (clearRun == false) {
+    console.log(moveData)
+    if (moveData.cardData === null) {
+      await handlePass(gameId, "player1");
+    } else {
+      if (!checkMovePossibilitty(gameData, moveData)) {
+        throw new Error("Move is impossible");
+      }
+      await insertMoveIntoDb(moveData, "player1");
     }
-    await insertMoveIntoDb(moveData, "player1");
   }
 
     switch (gameData.players.player2.actPassed) {
@@ -30,7 +34,7 @@ async function handleMove(moveData) {
               gameData.players.player2.actDeck
             );
             if (usedByBot === null) {
-              handlePass(gameId, "player2");
+              await handlePass(gameId, "player2");
               return await getPublicGameData(gameId);
             } else {
               const botMoveData = {
@@ -71,7 +75,6 @@ async function getGameData(gameId) {
     ])
     .toArray();
   await client.close();
-  // console.dir(gameData, {depth: null});
   if (gameData.length == 0) {
     throw new Error("No active game with this id");
   } else {
@@ -79,6 +82,7 @@ async function getGameData(gameId) {
   }
 }
 
+// Do refaktoryzacji - nie chcemy wysyłać pełnych info o grze
 async function getPublicGameData(gameId) {
   let dataToSend = await getGameData(gameId);
   // delete dataToSend.player1.actDeck;

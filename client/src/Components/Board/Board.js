@@ -80,6 +80,18 @@ const Board = () => {
     startGame();
   }, []);
 
+  async function sendMoveData(cardData=null) {
+    console.log(moveDataToSend(cardData))
+    axios
+      .post(`${config.serverURL}/move`, moveDataToSend(cardData))
+      .then((response) => {
+        console.log(response);
+        // console.log(response.body.players.player2);
+        setOpponentCardsOnBoard(groupCardsOnBoard(response.data.players.player2.history)); // format danych się zmieni
+      })
+      .catch((err) => console.error(err));
+  }
+
   const handleCardClick = (card) => {
     function actualiseBoard(card) {
       setPlayerCardsOnBoard((prevState) => {
@@ -90,21 +102,14 @@ const Board = () => {
         return updatedState;
       });
     }
-
+    sendMoveData(card)
     setPlayerCards(playerCards.filter(c => c !== card));
     actualiseBoard(card);
     // todo validacja czy rozpocząteo grę (mamy gameId) przed ruchem
-    axios
-      .post(`${config.serverURL}/move`, moveDataToSend(card))
-      .then((response) => {
-        console.log(response.data.players.player2.history);
-        setOpponentCardsOnBoard(groupCardsOnBoard(response.data.players.player2.history)); // format danych się zmieni
-      })
-      .catch((err) => console.error(err));
   };
 
   const handlePassClick = () => {
-    //TODO obsługa przycisku pass
+    sendMoveData(null)
   };
 
   // TODO przeniesienie wyświetlania planszy do innego pliku
