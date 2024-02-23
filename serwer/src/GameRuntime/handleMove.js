@@ -7,7 +7,6 @@ const connectionString = config.mongo.connection;
 // TODO gra po passie gracza
 
 async function handleMove(moveData) {
-  console.log("siema, rozpoczynam obsługę ruchu");
   const gameId = moveData.gameId;
   const gameData = await getGameData(gameId);
   // TODO drzewo jeśli otrzymaliśmy ruch od player2
@@ -18,7 +17,7 @@ async function handleMove(moveData) {
     if (!checkMovePossibilitty(gameData, moveData)) {
       throw new Error("Move is impossible");
     }
-    insertMoveIntoDb(moveData, "player1");
+    await insertMoveIntoDb(moveData, "player1");
   }
 
     switch (gameData.players.player2.actPassed) {
@@ -99,7 +98,6 @@ async function insertMoveIntoDb(moveData, playerNumber) {
       $pull: { [`players.${playerNumber}.actDeck`]: moveData.cardData },
     }
   );
-  //? nie mam pewności jak to się nazywa w linii niżej
   return queryRes.updatedCount === 1 ? true : false;
 }
 
