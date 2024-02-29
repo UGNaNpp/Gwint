@@ -3,6 +3,7 @@ import CardDisplay from "./CardDisplay.js";
 import "./Board.css";
 import axios from "axios";
 import Card from "./../Cards/Card.js";
+import BoardRow from "./BoardRow.jsx";
 const config = require("./../../Resources/config.json");
 const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO userId z ciasteczka stworzonego podczas logowania
 
@@ -112,7 +113,6 @@ const Board = () => {
     sendMoveData(null)
   };
 
-  // TODO przeniesienie wyświetlania planszy do innego pliku
   return (
     <div className="game">
       <p>Id gry: {gameId}</p>
@@ -130,37 +130,15 @@ const Board = () => {
         </div>
       </div>
       <div className="board">
-        <div className="row opponent-row ballista">
-          {opponentCardsOnBoard.ballista.map((card, index) => (
-            <CardDisplay key={index} {...card} />
-          ))}
-        </div>
-        <div className="row opponent-row ranged">
-          {opponentCardsOnBoard.ranged.map((card, index) => (
-            <CardDisplay key={index} {...card} />
-          ))}
-        </div>
-        <div className="row opponent-row melee">
-          {opponentCardsOnBoard.melee.map((card, index) => (
-            <CardDisplay key={index} {...card} />
-          ))}
-        </div>
+        <BoardRow cardType="ballista" cardsOnBoard={opponentCardsOnBoard} whose="opponent-row"/>
+        <BoardRow cardType="ranged" cardsOnBoard={opponentCardsOnBoard} whose="opponent-row"/>
+        <BoardRow cardType="melee" cardsOnBoard={opponentCardsOnBoard} whose="opponent-row"/>
+        
+        <BoardRow cardType="melee" cardsOnBoard={playerCardsOnBoard} whose="player-row"/>
+        <BoardRow cardType="ranged" cardsOnBoard={playerCardsOnBoard} whose="player-row"/>
+        <BoardRow cardType="ballista" cardsOnBoard={playerCardsOnBoard} whose="player-row"/>
 
-        <div className="row player-row melee">
-          {playerCardsOnBoard.melee.map((card, index) => (
-            <CardDisplay key={index} {...card} />
-          ))}
-        </div>
-        <div className="row player-row ranged">
-          {playerCardsOnBoard.ranged.map((card, index) => (
-            <CardDisplay key={index} {...card} />
-          ))}
-        </div>
-        <div className="row player-row ballista">
-          {playerCardsOnBoard.ballista.map((card, index) => (
-            <CardDisplay key={index} {...card} />
-          ))}
-        </div>
+
       </div>
       <div className="cards">
         {playerCards.map((card, index) => (

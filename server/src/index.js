@@ -43,6 +43,7 @@ app.post("/login", (req, res) => {
 // wymaga creatorId
 app.post("/new-game", (req, res) => {
   const creatorId = req.body.creatorId;
+  console.log(req.body)
   createGame(creatorId)
     .then((result) => res.status(201).send(result))
     .catch((err) => {
