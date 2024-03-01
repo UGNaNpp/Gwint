@@ -14,8 +14,30 @@ body {
   justify-content: space-between;
   height: 100%;
 }
-
-.board {
+.game .scores {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.game .scores .cristal {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 5px;
+  background-color: red;
+  border-radius: 50%;
+}
+.game .scores .passButton {
+  background-color: red;
+}
+.game .opponent-cards {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.game .board {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -26,8 +48,7 @@ body {
   margin-bottom: 100px;
   margin-top: 20px;
 }
-
-.row {
+.game .board .row {
   width: 100%;
   height: 100px;
   display: flex;
@@ -35,21 +56,10 @@ body {
   align-items: center;
   border-bottom: 1px solid black;
 }
-
-.row:last-child {
+.game .board .row:last-child {
   border-bottom: none;
 }
-
-.opponent-row {
-  background-color: #f8d7da;
-}
-
-.player-row {
-  background-color: #d4edda;
-}
-
-
-.cards {
+.game .cards {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -71,29 +81,10 @@ body {
   margin: 0 5px;
 }
 
-.opponent-cards {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  flex-wrap: wrap;
+.opponent-row {
+  background-color: #f8d7da;
 }
 
-.scores {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.cristal  {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-left: 5px;
-  background-color: red;
-  border-radius: 50%;
-}
-
-.passButton {
-  background-color: red;
-}
+.player-row {
+  background-color: #d4edda;
+}/*# sourceMappingURL=Board.css.map */
