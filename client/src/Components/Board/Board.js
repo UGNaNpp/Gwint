@@ -81,14 +81,31 @@ const Board = () => {
     startGame();
   }, []);
 
-  async function sendMoveData(cardData=null) {
-    console.log(moveDataToSend(cardData))
+  async function sendMoveData(cardData = null) {
+    function putOpponentCardsAfterTimeout(newOpponentCards) {
+      function setWithTimeout(card, type) {
+        setTimeout(() => {
+          setOpponentCardsOnBoard({
+            ...opponentCardsOnBoard,
+            [type]: [...opponentCardsOnBoard[type], card],
+          });
+        }, 1000); // Opóźnienie stawiania karty na planszy przez bota
+      }
+
+      newOpponentCards["melee"].map((card) => {
+        if ((!card) in opponentCardsOnBoard["melee"]) {
+          setWithTimeout(card, "melee");
+        }
+      });
+    }
+
+    // newOpponentCards = groupCardsOnBoard(newOpponentCards);
+    console.log(moveDataToSend(cardData));
     axios
       .post(`${config.serverURL}/move`, moveDataToSend(cardData))
       .then((response) => {
-        console.log(response);
-        // console.log(response.body.players.player2);
-        setOpponentCardsOnBoard(groupCardsOnBoard(response.data.players.player2.history)); // format danych się zmieni
+        console.log(response.data);
+        putOpponentCardsAfterTimeout(response.data.opponentsBoardCards)
       })
       .catch((err) => console.error(err));
   }
@@ -103,14 +120,14 @@ const Board = () => {
         return updatedState;
       });
     }
-    sendMoveData(card)
-    setPlayerCards(playerCards.filter(c => c !== card));
+    sendMoveData(card);
+    setPlayerCards(playerCards.filter((c) => c !== card));
     actualiseBoard(card);
     // todo validacja czy rozpocząteo grę (mamy gameId) przed ruchem
   };
 
   const handlePassClick = () => {
-    sendMoveData(null)
+    sendMoveData(null);
   };
 
   return (
@@ -130,15 +147,37 @@ const Board = () => {
         </div>
       </div>
       <div className="board">
-        <BoardRow cardType="ballista" cardsOnBoard={opponentCardsOnBoard} whose="opponent-row"/>
-        <BoardRow cardType="ranged" cardsOnBoard={opponentCardsOnBoard} whose="opponent-row"/>
-        <BoardRow cardType="melee" cardsOnBoard={opponentCardsOnBoard} whose="opponent-row"/>
-        
-        <BoardRow cardType="melee" cardsOnBoard={playerCardsOnBoard} whose="player-row"/>
-        <BoardRow cardType="ranged" cardsOnBoard={playerCardsOnBoard} whose="player-row"/>
-        <BoardRow cardType="ballista" cardsOnBoard={playerCardsOnBoard} whose="player-row"/>
+        <BoardRow
+          cardType="ballista"
+          cardsOnBoard={opponentCardsOnBoard}
+          whose="opponent-row"
+        />
+        <BoardRow
+          cardType="ranged"
+          cardsOnBoard={opponentCardsOnBoard}
+          whose="opponent-row"
+        />
+        <BoardRow
+          cardType="melee"
+          cardsOnBoard={opponentCardsOnBoard}
+          whose="opponent-row"
+        />
 
-
+        <BoardRow
+          cardType="melee"
+          cardsOnBoard={playerCardsOnBoard}
+          whose="player-row"
+        />
+        <BoardRow
+          cardType="ranged"
+          cardsOnBoard={playerCardsOnBoard}
+          whose="player-row"
+        />
+        <BoardRow
+          cardType="ballista"
+          cardsOnBoard={playerCardsOnBoard}
+          whose="player-row"
+        />
       </div>
       <div className="cards">
         {playerCards.map((card, index) => (

@@ -34,7 +34,7 @@ async function handleMove(moveData, clearRun=false) {
             );
             if (usedByBot === null) {
               // await handlePass(gameId, "player2");
-              return await getPublicGameData(gameId);
+              return await getCurrentMoveData(gameId);
             } else {
               const botMoveData = {
                 gameId: moveData.gameId,
@@ -45,7 +45,7 @@ async function handleMove(moveData, clearRun=false) {
               if (gameData.players.player1.actPassed) {
                 return await handleMove(moveData, true); // możemy użyć niezmienionego ruchu bo i tak musiał być on passem
               } else {
-                return await getPublicGameData(gameId);
+                return await getCurrentMoveData(gameId);
               }
             }
             }
@@ -73,16 +73,16 @@ async function getGameData(gameId) {
   if (gameData.length == 0) {
     throw new Error("No active game with this id");
   } else {
-    // console.dir(gameData, {depth: null})
     return gameData[0];
   }
 }
 
-// Do refaktoryzacji - nie chcemy wysyłać pełnych info o grze
-async function getPublicGameData(gameId) {
-  let dataToSend = await getGameData(gameId);
-  // delete dataToSend.player1.actDeck;
-  // delete dataToSend.player2.actDeck;
+async function getCurrentMoveData(gameId) {
+  const gameData = await getGameData(gameId);
+  const dataToSend = {
+    opponentsBoardCards: gameData.players.player2.history,
+    opponentsHandCardsCount: gameData.players.player2.actDeck.length
+  }
   return dataToSend;
 }
 
