@@ -83,18 +83,21 @@ const Board = () => {
 
   async function sendMoveData(cardData = null) {
     function putOpponentCardsAfterTimeout(newOpponentCards) {
-      function setWithTimeout(card, type) {
+      function setWithTimeout(card) {
         setTimeout(() => {
           setOpponentCardsOnBoard({
             ...opponentCardsOnBoard,
-            [type]: [...opponentCardsOnBoard[type], card],
+            [card.cardClass]: [opponentCardsOnBoard[card.cardClass], card],
           });
-        }, 1000); // Opóźnienie stawiania karty na planszy przez bota
+          console.log("Dodano kartę na plansze po upływie czasu")
+        }, 0); // Opóźnienie stawiania karty na planszy przez bota
       }
 
-      newOpponentCards["melee"].map((card) => {
-        if ((!card) in opponentCardsOnBoard["melee"]) {
-          setWithTimeout(card, "melee");
+      console.log("siema", opponentCardsOnBoard)
+      // ! To poniżej nie ma prawa działać i jest problemem
+      newOpponentCards.map((card) => {
+        if (!(card in opponentCardsOnBoard[card.cardClass])) {
+          setWithTimeout(card);
         }
       });
     }
@@ -104,7 +107,7 @@ const Board = () => {
     axios
       .post(`${config.serverURL}/move`, moveDataToSend(cardData))
       .then((response) => {
-        console.log(response.data);
+        console.log(response.data.opponentsBoardCards);
         putOpponentCardsAfterTimeout(response.data.opponentsBoardCards)
       })
       .catch((err) => console.error(err));
