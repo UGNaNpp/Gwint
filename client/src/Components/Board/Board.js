@@ -9,6 +9,7 @@ const developUserId = "f8d13d62-0124-4c07-901d-507e6ba45b59"; //TODO userId z ci
 
 const Board = () => {
   const [playerCards, setPlayerCards] = useState([]);
+  const [opponentHandCardsCounter, setOpponentHandCardsCounter] = useState(10);
   const [gameId, setGameId] = useState("Not known");
 
   function moveDataToSend(cardData = null) {
@@ -89,7 +90,7 @@ const Board = () => {
             ...opponentCardsOnBoard,
             [card.cardClass]: [...opponentCardsOnBoard[card.cardClass], card],
           });
-          console.log("Dodano kartę na plansze po upływie czasu")
+          setOpponentHandCardsCounter(opponentHandCardsCounter - 1);
         }, 1000); // Opóźnienie stawiania karty na planszy przez bota
       }
 
@@ -134,6 +135,7 @@ const Board = () => {
   return (
     <div className="game">
       <p>Id gry: {gameId}</p>
+      <p>Przeciwnikowi pozostało {opponentHandCardsCounter} kart na planszy</p>
       <div className="scores">
         <div className="score">
           Twój wynik: Score
