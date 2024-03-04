@@ -87,14 +87,12 @@ const Board = () => {
         setTimeout(() => {
           setOpponentCardsOnBoard({
             ...opponentCardsOnBoard,
-            [card.cardClass]: [opponentCardsOnBoard[card.cardClass], card],
+            [card.cardClass]: [...opponentCardsOnBoard[card.cardClass], card],
           });
           console.log("Dodano kartę na plansze po upływie czasu")
-        }, 0); // Opóźnienie stawiania karty na planszy przez bota
+        }, 1000); // Opóźnienie stawiania karty na planszy przez bota
       }
 
-      console.log("siema", opponentCardsOnBoard)
-      // ! To poniżej nie ma prawa działać i jest problemem
       newOpponentCards.map((card) => {
         if (!(card in opponentCardsOnBoard[card.cardClass])) {
           setWithTimeout(card);
