@@ -6,4 +6,6 @@ COPY ./new_server/ /app/
 
 EXPOSE 3000 
 
-CMD ["node", "new_serwer/app.js"]
+RUN npm install
+
+RUN node app.js

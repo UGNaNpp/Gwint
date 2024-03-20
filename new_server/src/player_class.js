@@ -1,11 +1,35 @@
 class Player{
-    constructor(name)
+    #name = "";
+    #cards = [];
+    #cards_played = [];
+    #cards_used = [];
+    #round_points = 0;
+    #rounds_lost = 0;
+
+    constructor(name) 
     {
         this.name = name;
-        this.cards = [];
-        this.cards_played = [];
-        this.cards_used = [];
-        this.round_points = 0;
-        this.rounds_lost = 0;
     }
+    play_card()
+    {
+
+    }
+    end_round()
+    {
+
+    }
+    round_result()
+    {
+
+    }
+    get_rounds()
+    {
+        return this.rounds_lost;
+    }
+    get_name()
+    {
+        return this.name;
+    }
+
+
 }
