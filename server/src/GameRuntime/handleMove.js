@@ -48,7 +48,7 @@ async function handleMove(moveData, clearRun=false) {
                 return await getPublicGameData(gameId);
               }
             }
-            }
+          }
         }
     }
 }
