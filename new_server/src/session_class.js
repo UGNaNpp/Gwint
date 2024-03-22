@@ -1,12 +1,10 @@
-class Session{
+export class Session{
     #player1;
-    #player2;
-    #round_clock;
+    #player2=null;
+    #round_clock=0;
 
-    constructor(player1, player2){
+    constructor(player1){
         this.player1 = player1;
-        this.player2 = player2;
-        this.round_clock = 0;
     }
 
     // private methods
@@ -28,9 +26,23 @@ class Session{
 
     // public methods
 
+    session_waiting_for_other_player()
+    {
+        return this.player2 === null;
+    }
+
     get_round_clock()
     {
         return this.round_clock;
     }
 
+    join_player(player)
+    {
+        this.player2 = player;
+    }
+
+    session_timeout()
+    {
+
+    }
 }

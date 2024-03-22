@@ -1,4 +1,4 @@
-const deck = {
+export const deck = {
     "No_deck": 0,
     "Monsters":1,
     "Scoiatel":2,
@@ -7,7 +7,7 @@ const deck = {
     "Northern_Realms":5,
 }
 
-class Card
+export class Card
 {
     #name;
     #picture;
@@ -21,7 +21,7 @@ class Card
     }
 }
 
-class Normal_Card extends Card
+export class Normal_Card extends Card
 {
     #strength = 0;
     #type = NULL;
@@ -36,7 +36,7 @@ class Normal_Card extends Card
     }
 }
 
-class Commander extends Card
+export class Commander extends Card
 {
     #deck;
 
