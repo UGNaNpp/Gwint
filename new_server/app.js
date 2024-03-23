@@ -3,6 +3,7 @@ const app = express();
 const port = 3000;
 const uri = 'mongodb://localhost:27003/';
 const MongoClient = require('mongodb').MongoClient;
+const Session = require('./src/session_class');
 
 app.use(express.json());
 
@@ -31,7 +32,11 @@ app.post('/api/addData', async (req, res) => {
     }
 });
 
-app.patch('/mm')
+app.patch('/mm', (req, res) => {
+    const { player1, player2 } = req.body;
+    const session = new Session(player1, player2);
+    res.status(200).json({ message: 'Powstała sesja', session });
+});
 app.get('/session/:sessionID')
 app.patch('/session/:sessionID/move')
 app.patch('/session/:sessionID/round')
