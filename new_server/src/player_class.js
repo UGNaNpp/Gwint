@@ -1,4 +1,4 @@
-class Player{
+export class Player{
     #name = "";
     #cards = [];
     #cards_played = [];

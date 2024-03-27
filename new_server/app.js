@@ -3,13 +3,18 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+import './src/http_handlers.js';
+
+let session_map = new Map();
+
 app.get('/', (req, res) => {
     res.send('Hello, World!');
     
 });
 
-
-app.patch('/mm')
+app.patch('/mm',(req,res) => {
+    handler_mm(session_map,req,res);
+})
 app.get('/session/:sessionID')
 app.patch('/session/:sessionID/move')
 app.patch('/session/:sessionID/round')

@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+
+  "dependencies": {
+    "uuid": "^9.0.1"
+
   "scripts": {
     "ndm": "nodemon app.js"
-  },
-  "dependencies": {
-    "express": "^4.18.3",
-    "ws": "^8.16.0"
   }
 }
