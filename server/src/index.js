@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 const { logIn, register } = require("./login");
 const { createGame } = require("./createGame");
+const {handleMove} = require("./GameRuntime/handleMove")
 
 app.use(cors());
 app.use(express.text({ type: "text/*" }));
@@ -42,6 +43,7 @@ app.post("/login", (req, res) => {
 // wymaga creatorId
 app.post("/new-game", (req, res) => {
   const creatorId = req.body.creatorId;
+  console.log(req.body)
   createGame(creatorId)
     .then((result) => res.status(201).send(result))
     .catch((err) => {
@@ -49,6 +51,18 @@ app.post("/new-game", (req, res) => {
       res.status(400).send(err.message);
     });
 });
+
+// takes gameId, userId, cardData(potem pewnie będzie po id)
+app.post("/move", (req, res) => {
+  handleMove(req.body)
+  .then((result) => {
+    console.dir(result, {depth: null})
+    res.status(201).send(result)})
+    .catch((err) => {
+      console.error(err);
+      res.status(400).send(err.message);
+    });
+})
 
 app.listen(PORT, () => {
   console.log(`Server running at: http://localhost:${PORT}/`);
