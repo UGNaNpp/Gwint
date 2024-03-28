@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
+import {handler_mm} from './src/http_handlers.js';
 
 const app = express();
 const port = 3000;
+app.use(express.json());
 
-import './src/http_handlers.js';
 
-let session_map = new Map();
+let session_map = new Map(); // session_id -> Session
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');
@@ -13,9 +14,14 @@ app.get('/', (req, res) => {
 });
 
 app.patch('/mm',(req,res) => {
+  // req zawiera: player_id
+  console.log(req.body)
     handler_mm(session_map,req,res);
 })
-app.get('/session/:sessionID')
+app.get('/session/:sessionID', (req, res) => {
+  const sessionID = req.params.sessionID;
+  res.send(session_map[sessionID])
+})
 app.patch('/session/:sessionID/move')
 app.patch('/session/:sessionID/round')
 
@@ -26,12 +32,14 @@ app.patch('/player/:playerID/edit')
 
 app.get('/ranking')
 
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
 
-const { WebSocketServer } = require('ws');
+
+import { WebSocketServer } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -44,3 +52,5 @@ wss.on('connection', function connection(ws) {
 
   ws.send('something');
 });
+
+

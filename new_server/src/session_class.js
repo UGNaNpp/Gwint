@@ -1,10 +1,14 @@
+import './player_class.js';
+
 export class Session{
     #player1;
     #player2=null;
     #round_clock=0;
+    #session_id;
 
-    constructor(player1){
+    constructor(player1, session_id){
         this.player1 = player1;
+        this.#session_id = session_id;
     }
 
     // private methods
@@ -36,13 +40,22 @@ export class Session{
         return this.round_clock;
     }
 
-    join_player(player)
+    join_player(player_id)
     {
-        this.player2 = player;
+        this.player2 = new Player(player_id);
     }
 
     session_timeout()
     {
+        
+    }
 
+    toJSON() {
+        const player2Info = this.#player2 === null ? null : this.#player2.toJSON();
+        return {
+            player1: this.#player1.toJSON(),
+            player2: player2Info,
+            round_clock: this.#round_clock
+        }
     }
 }

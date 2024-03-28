@@ -1,18 +1,19 @@
-import 'session_class.js'
-import 'player_class.js'
+import './session_class.js'
+import './player_class.js'
 
 
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
 
-export const handler_mm = (session_map,request,response) =>                 // endpoint /mm 
+
+export const handler_mm = (session_map,req,response) =>                 // endpoint /mm 
 {
     // TODO authenticate
 
     // check if session_map has any session with one player if not create new session
     // if session has one player add the second player
-
-    const player_id = "mock_player_id";
+    // console.log(req)
+    const player_id = req.body.player_id;
 
     const session_to_join = session_map.values.find(session =>              //szukamy sesji z jednym graczem
     {
@@ -26,11 +27,10 @@ export const handler_mm = (session_map,request,response) =>                 // e
 
     if(session_to_join === undefined || session_to_join === null)   //spawrdzamy czy jest juz sesja z jednym graczem
     {                                                               
-        const new_session = new Session(new Player());    //jeżeli nie to tworzymy nową
+        const new_session = new Session(new Player(player_id));    //jeżeli nie to tworzymy nową
         session_map.set(session_id,new_session);                    //dodajemy do mapy
-
         response.sendStatus(102);                                   //zwracamy kod 102 że czekamy na drugiego gracza
-
+        
         const interval = setInterval(()=>                           //sprawdzamy co sekundę czy drugi gracz dołączył
         {
             if(session_map.get(session_id).session_waiting_for_other_player() === false)    //jeżeli dołączył to kończymy
@@ -40,7 +40,7 @@ export const handler_mm = (session_map,request,response) =>                 // e
                 response.sendStatus(200);                   //zwracamy kod 200 że wszystko ok i mozna rozpocząć grę
             }                          // moze dodać mozna funkcja ktora wysle rozpoczecie gry i losowanie ale to jako callback
         },1000)
-
+        
         const timeout = setTimeout(()=>                     //jeżeli gracz nie dołączy w ciągu 6 minut to kończymy
         {
             clearInterval(interval);
@@ -55,9 +55,9 @@ export const handler_mm = (session_map,request,response) =>                 // e
 
 }
 
-export const handler_session_id = (session_map,request,response) =>         // endpoint /session/:sessionID
+export const handler_session_id = (session_map,req,response) =>         // endpoint /session/:sessionID
 {
-    const session_id = request.params.sessionID;
+    const session_id = req.params.sessionID;
     
     const session = session_map.get(session_id);
     
@@ -65,12 +65,13 @@ export const handler_session_id = (session_map,request,response) =>         // e
 
 }
 
-export const handler_session_id_move = (session_map,request,response) =>    // endpoint /session/:sessionID/move
+export const handler_session_id_move = (session_map,req,response) =>    // endpoint /session/:sessionID/move
 {
 
 }
 
-export const handler_session_id_round = (session_map,request,response) =>   // endpoint /session/:sessionID/round
+export const handler_session_id_round = (session_map,req,response) =>   // endpoint /session/:sessionID/round
 {   
     
 }
+
